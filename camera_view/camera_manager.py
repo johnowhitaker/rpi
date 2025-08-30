@@ -43,7 +43,9 @@ class CameraController:
         self.preview_config = self.picam2.create_video_configuration(
             main={"size": preview_size}
         )
-        self.still_config = self.picam2.create_still_configuration()
+        self.still_config = self.picam2.create_still_configuration(
+            main={"format": "RGB888"}
+        )
 
         self.picam2.configure(self.preview_config)
 
@@ -135,10 +137,22 @@ class CameraController:
         filename = f"{self.label}_{ts}.jpg"
         path = os.path.join(dir_path, filename)
         with self.lock:
-            # Switch to still mode for full-res capture, then return to preview
-            self.picam2.switch_mode_and_capture_file(self.still_config, path)
-            # Back to preview automatically handled by switch_mode_and_capture_file
-            self.picam2.set_controls({})
+            # Pause MJPEG recording during still capture to avoid encoder conflicts
+            try:
+                self.picam2.stop_recording()
+            except Exception:
+                pass
+
+            # Switch to still mode, capture, then switch back
+            self.picam2.switch_mode(self.still_config)
+            self.picam2.capture_file(path)
+            self.picam2.switch_mode(self.preview_config)
+
+            # Resume MJPEG recording
+            try:
+                self.picam2.start_recording(self.encoder, FileOutput(self.output))
+            except Exception:
+                pass
         return path
 
     def stop(self):
