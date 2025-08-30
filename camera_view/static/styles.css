@@ -1,0 +1,27 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: #111; background: #f8f9fb; }
+header { padding: 12px 16px; background: #1f2937; color: #fff; }
+header h1 { margin: 0; font-size: 18px; }
+main { padding: 12px 16px; }
+
+.cams { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 1100px) { .cams { grid-template-columns: 1fr; } }
+
+section.cam { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+section.cam h2 { margin: 0 0 8px; font-size: 16px; color: #111827; }
+
+.row { display: grid; gap: 12px; grid-template-columns: 640px 1fr; align-items: start; }
+.preview { width: 640px; height: 480px; overflow: hidden; border: 1px solid #ddd; border-radius: 4px; background: #000; }
+.preview img { width: 100%; height: 100%; object-fit: cover; }
+
+.controls { display: grid; grid-template-columns: repeat(2, minmax(220px, 1fr)); gap: 10px 14px; }
+.controls .control { background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px; }
+.controls .group { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(160px, 1fr)); gap: 8px; }
+.controls label { display: block; font-size: 12px; color: #374151; margin-bottom: 6px; }
+.controls .val { font-weight: 600; margin-left: 6px; color: #111827; }
+.btns { display: flex; gap: 8px; align-items: center; }
+button { background: #2563eb; color: #fff; border: 0; border-radius: 6px; padding: 8px 12px; cursor: pointer; }
+button:disabled { opacity: 0.6; cursor: default; }
+a.caplink { color: #2563eb; text-decoration: none; font-size: 12px; }
+p.err { color: #b91c1c; }
+
