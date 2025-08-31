@@ -87,11 +87,11 @@ async function buildCamera(cam) {
   controls.className = 'controls';
 
   // Controls
-  controls.appendChild(makeCheckbox(`ae_${cam.id}`, 'Auto Exposure', true, async (v) => {
+  controls.appendChild(makeCheckbox(`ae_${cam.id}`, 'Auto Exposure', false, async (v) => {
     await fetchJSON(`/api/${cam.id}/controls`, { method: 'POST', body: JSON.stringify({ ae_enable: v }) });
   }));
 
-  controls.appendChild(makeRange(`exp_${cam.id}`, 'Exposure (us)', 100, 1000000, 100, 10000, async (v) => {
+  controls.appendChild(makeRange(`exp_${cam.id}`, 'Exposure (us)', 100, 200000, 100, 2000, async (v) => {
     await fetchJSON(`/api/${cam.id}/controls`, { method: 'POST', body: JSON.stringify({ exposure_time: v }) });
   }));
 
@@ -99,7 +99,7 @@ async function buildCamera(cam) {
     await fetchJSON(`/api/${cam.id}/controls`, { method: 'POST', body: JSON.stringify({ analogue_gain: v }) });
   }));
 
-  controls.appendChild(makeCheckbox(`awb_${cam.id}`, 'Auto White Balance', true, async (v) => {
+  controls.appendChild(makeCheckbox(`awb_${cam.id}`, 'Auto White Balance', false, async (v) => {
     await fetchJSON(`/api/${cam.id}/controls`, { method: 'POST', body: JSON.stringify({ awb_enable: v }) });
   }));
 
@@ -136,13 +136,13 @@ async function buildCamera(cam) {
   toneRow.appendChild(makeRange(`bright_${cam.id}`, 'Brightness', -1.0, 1.0, 0.05, 0.0, async (v) => {
     await fetchJSON(`/api/${cam.id}/controls`, { method: 'POST', body: JSON.stringify({ brightness: v }) });
   }));
-  toneRow.appendChild(makeRange(`contrast_${cam.id}`, 'Contrast', 0.0, 32.0, 0.5, 1.0, async (v) => {
+  toneRow.appendChild(makeRange(`contrast_${cam.id}`, 'Contrast', 0.0, 2.5, 0.05, 1.0, async (v) => {
     await fetchJSON(`/api/${cam.id}/controls`, { method: 'POST', body: JSON.stringify({ contrast: v }) });
   }));
-  toneRow.appendChild(makeRange(`saturation_${cam.id}`, 'Saturation', 0.0, 32.0, 0.5, 1.0, async (v) => {
+  toneRow.appendChild(makeRange(`saturation_${cam.id}`, 'Saturation', 0.0, 2.5, 0.05, 1.0, async (v) => {
     await fetchJSON(`/api/${cam.id}/controls`, { method: 'POST', body: JSON.stringify({ saturation: v }) });
   }));
-  toneRow.appendChild(makeRange(`sharpness_${cam.id}`, 'Sharpness', 0.0, 16.0, 0.5, 1.0, async (v) => {
+  toneRow.appendChild(makeRange(`sharpness_${cam.id}`, 'Sharpness', 0.0, 5.0, 0.1, 1.0, async (v) => {
     await fetchJSON(`/api/${cam.id}/controls`, { method: 'POST', body: JSON.stringify({ sharpness: v }) });
   }));
   controls.appendChild(toneRow);

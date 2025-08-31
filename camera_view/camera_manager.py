@@ -155,6 +155,50 @@ class CameraController:
                 pass
         return path
 
+    def capture_jpeg_bytes(self) -> bytes:
+        import io, os, tempfile
+        with self.lock:
+            try:
+                self.picam2.stop_recording()
+            except Exception:
+                pass
+            # Switch to still mode and capture to memory as JPEG
+            self.picam2.switch_mode(self.still_config)
+            buf = io.BytesIO()
+            data: bytes | None = None
+            try:
+                # Prefer direct in-memory capture if supported
+                try:
+                    self.picam2.capture_file(buf, format='jpeg')  # type: ignore[arg-type]
+                    data = buf.getvalue()
+                except TypeError:
+                    # Older versions may not accept 'format'; try without
+                    buf.seek(0)
+                    self.picam2.capture_file(buf)  # type: ignore[arg-type]
+                    data = buf.getvalue()
+            except Exception:
+                # Fall back to a temp file if in-memory capture is unsupported
+                tmp = tempfile.NamedTemporaryFile(suffix='.jpg', delete=False)
+                tmp_path = tmp.name
+                tmp.close()
+                try:
+                    self.picam2.capture_file(tmp_path)
+                    with open(tmp_path, 'rb') as f:
+                        data = f.read()
+                finally:
+                    try:
+                        os.unlink(tmp_path)
+                    except Exception:
+                        pass
+            finally:
+                # Switch back to preview mode and resume MJPEG
+                self.picam2.switch_mode(self.preview_config)
+                try:
+                    self.picam2.start_recording(self.encoder, FileOutput(self.output))
+                except Exception:
+                    pass
+            return data or b''
+
     def stop(self):
         with self.lock:
             try:

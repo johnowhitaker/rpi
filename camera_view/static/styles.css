@@ -25,3 +25,9 @@ button:disabled { opacity: 0.6; cursor: default; }
 a.caplink { color: #2563eb; text-decoration: none; font-size: 12px; }
 p.err { color: #b91c1c; }
 
+
+/* Sliders: full width for fine control */
+.controls input[type=range] {
+  width: 100%;
+}
+

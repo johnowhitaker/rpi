@@ -88,11 +88,36 @@ def af_trigger(cam_id: str):
     return jsonify({"status": "ok"})
 
 
-@app.route("/api/<cam_id>/capture", methods=["POST"])
+@app.route("/api/<cam_id>/capture", methods=["GET", "POST"])
 def capture(cam_id: str):
     if cam_id not in {c["id"] for c in manager.list_cameras()}:
         return "Camera not found", 404
     ctrl = manager.get(cam_id)
+    if request.method == "GET":
+        # Return JPEG bytes directly; do not save to disk by default
+        img = ctrl.capture_jpeg_bytes()
+        headers = {"Cache-Control": "no-store"}
+        # Optional: save=1 to also persist to captures directory
+        save = request.args.get("save", "0").lower() in ("1", "true", "yes")
+        filename = None
+        if save:
+            os.makedirs(CAPTURES_DIR, exist_ok=True)
+            filename = f"{ctrl.label}_" + datetime.now().strftime("%Y%m%d_%H%M%S_%f") + ".jpg"
+            path = os.path.join(CAPTURES_DIR, filename)
+            try:
+                with open(path, 'wb') as f:
+                    f.write(img)
+            except Exception:
+                pass
+            headers["X-Saved-Filename"] = filename
+            headers["X-Saved-Url"] = f"/captures/{filename}"
+        disp = request.args.get("download", "0").lower() in ("1", "true", "yes")
+        if disp:
+            headers["Content-Disposition"] = f'attachment; filename="{filename or "capture.jpg"}"'
+        else:
+            headers["Content-Disposition"] = f'inline; filename="{filename or "capture.jpg"}"'
+        return Response(img, mimetype="image/jpeg", headers=headers)
+    # POST behavior remains: capture and save to disk, return JSON
     path = ctrl.capture_still(CAPTURES_DIR)
     filename = os.path.basename(path)
     return jsonify({
