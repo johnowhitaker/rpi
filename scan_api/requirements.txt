@@ -1,0 +1,4 @@
+Flask==3.0.3
+Pillow==10.4.0
+pyserial>=3.5
+# picamera2 is typically installed via apt on Raspberry Pi OS
