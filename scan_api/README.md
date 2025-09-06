@@ -33,6 +33,8 @@ Key Endpoints
 - GET `/camera/metadata`: latest Picamera2 metadata.
 - POST `/camera/controls`: set controls (ae_enable, awb_enable, exposure_time, analogue_gain, ev, af_mode, af_trigger, lens_position, brightness, contrast, saturation, sharpness, noise_reduction_mode, awb_mode).
  - GET `/camera/caps`: supported control keys + current metadata snapshot.
+ - GET `/camera/defaults`: return persisted default controls (applied at startup if present).
+ - POST `/camera/defaults`: save default controls (accepts either `{...}` or `{defaults:{...}}`, `apply` flag default true).
 
 - GET `/preview.mjpg`: full-frame MJPEG (low-res for responsiveness).
 - GET `/preview_crop.mjpg`: cropped MJPEG stream with params: `cw`, `ch`, `ox`, `oy`, `flip`, `fps`, `quality`.

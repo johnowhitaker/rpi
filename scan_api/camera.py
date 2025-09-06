@@ -82,9 +82,13 @@ class CameraController:
             elif k == "lens_position":
                 m["LensPosition"] = float(v)
             elif k == "awb_mode":
-                m["AwbMode"] = v
+                awb = self._awb_mode_value(v)
+                if awb is not None:
+                    m["AwbMode"] = awb
             elif k == "noise_reduction_mode":
-                m["NoiseReductionMode"] = v
+                nr = self._nr_mode_value(v)
+                if nr is not None:
+                    m["NoiseReductionMode"] = nr
             elif k == "af_mode":
                 m["AfMode"] = self._af_mode_value(v)
             elif k == "af_trigger":
@@ -121,6 +125,56 @@ class CameraController:
                 "cancel": controls.AfTriggerEnum.Cancel,
             }
             return mapping.get(name, v)
+        return v
+
+    def _awb_mode_value(self, v):
+        # Map string names to libcamera enums; skip if unknown to avoid type errors
+        if isinstance(v, int):
+            return v
+        if controls is None:
+            return None if isinstance(v, str) else v
+        if isinstance(v, str):
+            name = v.strip().lower()
+            mapping = {
+                "auto": getattr(controls.AwbModeEnum, "Auto", None),
+                "incandescent": getattr(controls.AwbModeEnum, "Incandescent", None),
+                "tungsten": getattr(controls.AwbModeEnum, "Tungsten", None),
+                "fluorescent": getattr(controls.AwbModeEnum, "Fluorescent", None),
+                "indoor": getattr(controls.AwbModeEnum, "Indoor", None),
+                "daylight": getattr(controls.AwbModeEnum, "Daylight", None),
+                "cloudy": getattr(controls.AwbModeEnum, "Cloudy", None),
+                "shade": getattr(controls.AwbModeEnum, "Shade", None),
+            }
+            return mapping.get(name)
+        return v
+
+    def _nr_mode_value(self, v):
+        # Map string names to libcamera draft enums; skip if unknown
+        if isinstance(v, int):
+            return v
+        if controls is None:
+            return None if isinstance(v, str) else v
+        enum_cls = None
+        try:
+            enum_cls = getattr(getattr(controls, "draft"), "NoiseReductionModeEnum")  # type: ignore[attr-defined]
+        except Exception:
+            try:
+                enum_cls = getattr(controls, "NoiseReductionModeEnum")
+            except Exception:
+                enum_cls = None
+        if enum_cls is None:
+            return None if isinstance(v, str) else v
+        if isinstance(v, str):
+            name = v.strip().lower()
+            mapping = {
+                "off": getattr(enum_cls, "Off", None),
+                "fast": getattr(enum_cls, "Fast", None),
+                "high_quality": getattr(enum_cls, "HighQuality", None),
+                "minimal": getattr(enum_cls, "Minimal", None),
+                "zsl": getattr(enum_cls, "ZSL", None),
+                # 'auto' often isn't a valid enum; skip to avoid type error
+            }
+            return mapping.get(name)
         return v
 
     # -----------------
@@ -256,4 +310,3 @@ def mjpeg_stream(output: StreamingOutput, *,
             + data
             + b"\r\n"
         )
-

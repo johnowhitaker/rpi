@@ -1,6 +1,7 @@
 import base64
 import io
 import os
+import json
 import signal
 import threading
 import time
@@ -23,7 +24,9 @@ ANCHOR_X = float(os.environ.get("ANCHOR_X", "100"))
 ANCHOR_Y = float(os.environ.get("ANCHOR_Y", "100"))
 ANCHOR_Z = float(os.environ.get("ANCHOR_Z", "100"))
 
-CAPTURES_DIR = os.path.join(os.path.dirname(__file__), "captures")
+BASE_DIR = os.path.dirname(__file__)
+CAPTURES_DIR = os.path.join(BASE_DIR, "captures")
+CAM_DEFAULTS_PATH = os.path.join(BASE_DIR, "camera_defaults.json")
 
 
 app = Flask(__name__)
@@ -38,6 +41,15 @@ class State:
         self.feed_xy: int = FEED_XY_DEFAULT
         self.feed_z: int = FEED_Z_DEFAULT
         self.anchor = {"x": ANCHOR_X, "y": ANCHOR_Y, "z": ANCHOR_Z}
+        # Apply persisted camera defaults if present
+        try:
+            if os.path.exists(CAM_DEFAULTS_PATH):
+                with open(CAM_DEFAULTS_PATH, "r", encoding="utf-8") as f:
+                    defaults = json.load(f) or {}
+                if isinstance(defaults, dict) and defaults:
+                    self.camera.set_controls(defaults)
+        except Exception:
+            pass
 
 
 STATE = State()
@@ -222,6 +234,36 @@ def camera_controls():
     data = request.get_json(force=True, silent=True) or {}
     STATE.camera.set_controls(data)
     return jsonify({"ok": True})
+
+
+@app.get("/camera/defaults")
+def camera_defaults_get():
+    data: Dict[str, Any] = {}
+    try:
+        if os.path.exists(CAM_DEFAULTS_PATH):
+            with open(CAM_DEFAULTS_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f) or {}
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+    return jsonify({"ok": True, "defaults": data})
+
+
+@app.post("/camera/defaults")
+def camera_defaults_set():
+    body = request.get_json(force=True, silent=True) or {}
+    # Accept either {"defaults": {...}} or a flat dict of controls
+    defaults = body.get("defaults") if isinstance(body, dict) else None
+    if not isinstance(defaults, dict):
+        defaults = body if isinstance(body, dict) else {}
+    apply_now = bool(body.get("apply", True))
+    try:
+        with open(CAM_DEFAULTS_PATH, "w", encoding="utf-8") as f:
+            json.dump(defaults, f, indent=2)
+        if apply_now and isinstance(defaults, dict) and defaults:
+            STATE.camera.set_controls(defaults)
+        return jsonify({"ok": True})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
 
 
 @app.get("/camera/caps")
