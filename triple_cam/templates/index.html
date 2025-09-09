@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Triple Camera</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Triple Camera Capture</h1>
+      <p class="sub">Two Raspberry Pi cameras + your phone camera</p>
+    </header>
+    <main>
+      <section class="previews">
+        <div class="pi-cams">
+          <h2>Pi Camera Previews</h2>
+          <div id="pi-streams" class="streams"></div>
+        </div>
+        <div class="phone-cam">
+          <h2>Phone Camera</h2>
+          <div class="phone-preview">
+            <video id="phoneVideo" playsinline autoplay muted></video>
+          </div>
+          <div class="controls">
+            <button id="snapBtn">Snap Triple</button>
+            <label><input type="checkbox" id="useFront"> Use front camera</label>
+          </div>
+          <p id="status"></p>
+          <div id="latest" class="latest"></div>
+        </div>
+      </section>
+      <section class="history">
+        <h2>History</h2>
+        <div id="history"></div>
+      </section>
+    </main>
+    <script src="/static/main.js"></script>
+  </body>
+  </html>

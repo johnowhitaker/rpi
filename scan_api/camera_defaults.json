@@ -1,0 +1,14 @@
+{
+  "ae_enable": false,
+  "awb_enable": false,
+  "exposure_time": 3000,
+  "analogue_gain": 1,
+  "af_mode": "manual",
+  "lens_position": 1,
+  "awb_mode": "Auto",
+  "noise_reduction_mode": "high_quality",
+  "brightness": 0.5,
+  "contrast": 2,
+  "saturation": 1,
+  "sharpness": 1
+}
